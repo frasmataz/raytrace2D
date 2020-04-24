@@ -230,7 +230,11 @@ class Game:
 
             pygame.draw.line(
                 self.screen,
-                pygame.Color(max(int(255-(ray['length'] / 3)), 0), 0, 0),
+                pygame.Color(
+                    int(numpy.clip(
+                        (1/numpy.square(ray['length']/self.screenWidth)),
+                    0, 255)),
+                0, 0),
                 (int(self.playerPosition[0]), int(self.playerPosition[1])),
                 ray['pos'],
                 2
