@@ -13,8 +13,9 @@ class Game:
     screen = pygame.display.set_mode((screenWidth, screenHeight))
     clock = pygame.time.Clock()
 
-    fov = numpy.pi/2
-    numberOfRays = 180
+    fov = numpy.pi/1.7
+    verticalFovScale = 0.3
+    numberOfRays = int(screenWidth / 5)
 
     playerPosition = (50.0, 50.0)
     playerMoveSpeed = 10.0
@@ -216,7 +217,7 @@ class Game:
         for slice in range(self.numberOfRays):
             ray = rays[slice]
             rectX = (rectWidth * slice) - rectWidth
-            rectHeight = numpy.clip(1000 - ray['length'], 0, self.screenHeight)
+            rectHeight = numpy.clip(self.screenHeight / ray['length'] * (self.screenHeight/2) * self.verticalFovScale, 0, self.screenHeight)
             screenCentreline = self.screenHeight/2
             rect = pygame.Rect(
                 rectX,
