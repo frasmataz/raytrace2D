@@ -14,7 +14,7 @@ class Game:
     clock = pygame.time.Clock()
 
     fov = numpy.pi/2
-    rays = 600
+    numberOfRays = 180
 
     playerPosition = (50.0, 50.0)
     playerMoveSpeed = 10.0
@@ -178,14 +178,21 @@ class Game:
             2
         )
 
-    def drawRays(self):
+    def computeRays(self):
         angleToMouse = self.getRayAngle(
             self.playerPosition, self.mousePosition)
-        zeroRayAngle = angleToMouse - (self.fov/2)
-        for rayIndex in range(self.rays):
-            angle = zeroRayAngle + (rayIndex * (self.fov/self.rays))
-            ray = self.castRay(self.playerPosition, angle)
 
+        zeroRayAngle = angleToMouse - (self.fov/2)
+
+        rays = []
+        for rayIndex in range(self.numberOfRays):
+            angle = zeroRayAngle + (rayIndex * (self.fov/self.numberOfRays))
+            rays.append(self.castRay(self.playerPosition, angle))
+
+        return rays
+
+    def drawRays(self, rays):
+        for ray in rays:
             pygame.draw.line(
                 self.screen,
                 pygame.Color(
@@ -198,19 +205,45 @@ class Game:
                 2
             )
 
-    def draw(self):
-        self.screen.fill(pygame.Color(20, 20, 30))
+    def drawMap(self, rays):
         self.drawSurfaces()
         self.drawPlayer()
-        self.drawRays()
+        #self.drawRays(rays)
         pygame.display.flip()
+
+    def drawFirstPerson(self, rays):
+        rectWidth = int(self.screenWidth/self.numberOfRays)
+        for slice in range(self.numberOfRays):
+            ray = rays[slice]
+            rectX = (rectWidth * slice) - rectWidth
+            rectHeight = numpy.clip(1000 - ray['length'], 0, self.screenHeight)
+            screenCentreline = self.screenHeight/2
+            rect = pygame.Rect(
+                rectX,
+                screenCentreline - (rectHeight / 2),
+                rectWidth,
+                rectHeight
+            )
+            pygame.draw.rect(
+                self.screen,
+                pygame.Color(
+                    int(numpy.clip(
+                        (1/numpy.square(ray['length']/self.screenWidth))* 5,
+                    0, 255)),
+                0, 0),
+                rect
+            )
 
     def run(self):
         while True:
             self.clock.tick(FPS)
             self.handleEvents()
             self.update()
-            self.draw()
+            rays = self.computeRays()
+
+            self.screen.fill(pygame.Color(20, 20, 30))
+            self.drawFirstPerson(rays)
+            self.drawMap(rays)
 
 
 game = Game()
